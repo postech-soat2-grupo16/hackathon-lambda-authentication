@@ -23,8 +23,8 @@ data "archive_file" "code" {
 
 #Security Group ECS
 resource "aws_security_group" "security_group_auth_lambda" {
-  name_prefix = "security_group_auth_lambda"
-  description = "SG for Authentication Lambda"
+  name_prefix = "hackathon_security_group_auth_lambda"
+  description = "SG for HACKATHON Authentication Lambda"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -44,7 +44,7 @@ resource "aws_security_group" "security_group_auth_lambda" {
   tags = {
     infra   = "lambda"
     service = "gateway"
-    Name    = "security_group_auth_lambda"
+    Name    = "hackathon_security_group_auth_lambda"
   }
 }
 
