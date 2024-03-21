@@ -1,0 +1,44 @@
+name: Destroy Lambda Authentication
+
+on:
+  workflow_dispatch:
+
+jobs:
+  destroy-infra:
+    name: deploy
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Code Checkout
+        uses: actions/checkout@v3
+
+      #AWS CREDENTIALS
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      #Terraform execution
+      - name: Terraform Init
+        run: |
+          cd terraform
+          terraform init
+
+      - name: Terraform Destroy
+        run:  |
+          cd terraform
+          terraform destroy -auto-approve
+        env:
+          TF_VAR_lambda_execution_role: ${{ secrets.LAMBDA_EXECUTION_ROLE }}
+          TF_VAR_rds_endpoint: ${{ secrets.RDS_ENDPOINT_HACKATHON_TIMECLOCK }}
+          TF_VAR_rds_db_name: ${{ secrets.HACKATHON_DB_NAME_TIMECLOCK }}
+          TF_VAR_vpc_id: ${{ vars.vpc_id }}
+          TF_VAR_subnet_a: ${{ vars.SUBNET_A }}
+          TF_VAR_subnet_b: ${{ vars.SUBNET_B }}
+          TF_VAR_secret_name: ${{ secrets.HACKATHON_DB_SECRET_NAME }}
+          TF_VAR_secret_name_auth: ${{ secrets.HACKATHON_SECRET_NAME_AUTH }}
