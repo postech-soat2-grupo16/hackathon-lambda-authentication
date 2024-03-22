@@ -8,48 +8,56 @@ import sys
 import bcrypt
 
 def main(event, context):
-    print('chegou no lambda')
-    statusCode = 401,
-    body = json.dumps({
-        "message": "Unauthorized: Missing or invalid authentication credentials."
-    })
-
     if 'body' in event:
-        print('tem body')
         request_body = json.loads(event['body'])
         if 'registration' and 'password' in request_body:
-            print('tem reg e password')
             registration = request_body['registration']
             password = request_body['password']
             result = get_password(registration)
             if result:
-                print('tem result: ',result)
                 if verify_password(result[0], password):
                     jwt = build_jwt(registration)
-                    statusCode = 200
-                    body = json.dumps({
-                        "token": jwt
-                    })
+                    return {
+                        "statusCode": 200,
+                        "headers": {
+                            "Content-Type": "application/json"
+                        },
+                        "body": json.dumps({
+                            "token": jwt
+                        })
+                    }
                 else:
-                    body = json.dumps({
-                        "message": "Wrong password"
-                    })
+                    return {
+                        "statusCode": 401,
+                        "headers": {
+                            "Content-Type": "application/json"
+                        },
+                        "body": json.dumps({
+                            "message": "Wrong password"
+                        })
+                    }
             else:
-                body = json.dumps({
-                    "message": "User not found"
-                })
-    response = {
-        "statusCode": statusCode,
+                return {
+                    "statusCode": 401,
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "body": json.dumps({
+                        "message": "User not found"
+                    })
+                }
+    return {
+        "statusCode": 401,
         "headers": {
             "Content-Type": "application/json"
         },
-        "body": body
+        "body": json.dumps({
+            "message": "Unauthorized: Missing or invalid authentication credentials."
+        })
     }
-    return response
 
 def get_secrets(secret_name):
     try:
-        print('vai recuperar os secrets: ', secret_name)
         # Create a Secrets Manager client
         session = boto3.session.Session()
         client = session.client(
@@ -65,10 +73,8 @@ def get_secrets(secret_name):
 
 def get_password(registration):
     try:
-        print('vai conectar ao DB')
         #Get secrets
         secret = get_secrets(os.environ['SECRET_NAME'])
-        print('secrets: ', secret)
         db_username = secret['username']
         db_password = secret['password']
         db_name = secret['dbname']
