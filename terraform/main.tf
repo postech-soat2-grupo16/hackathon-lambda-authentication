@@ -56,7 +56,7 @@ resource "aws_lambda_function" "lambda_authentication" {
   filename         = data.archive_file.code.output_path
   source_code_hash = data.archive_file.code.output_base64sha256
   role             = var.lambda_execution_role
-  timeout          = 120
+  timeout          = 30
   description      = "Hackathon - Lambda para autenticar"
 
   vpc_config {
