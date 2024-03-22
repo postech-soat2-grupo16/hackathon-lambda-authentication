@@ -23,6 +23,7 @@ def main(event, context):
             password = request_body['password']
             result = get_password(registration)
             if result:
+                print('tem result: ',result)
                 if verify_password(result[0], password):
                     jwt = build_jwt(registration)
                     statusCode = 200
@@ -63,6 +64,7 @@ def get_secrets(secret_name):
 
 def get_password(registration):
     try:
+        print('vai conectar ao DB')
         #Get secrets
         secret = get_secrets(os.environ['SECRET_NAME'])
         db_username = secret['username']
