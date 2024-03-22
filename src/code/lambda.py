@@ -15,7 +15,7 @@ def main(event, context):
 
     if 'body' in event:
         request_body = json.loads(event['body'])
-        if 'registration' & 'password' in request_body:
+        if 'registration' and 'password' in request_body:
             registration = request_body['registration']
             password = request_body['password']
             result = get_password(registration)
