@@ -49,6 +49,7 @@ def main(event, context):
 
 def get_secrets(secret_name):
     try:
+        print('vai recuperar os secrets: ', secret_name)
         # Create a Secrets Manager client
         session = boto3.session.Session()
         client = session.client(
@@ -67,6 +68,7 @@ def get_password(registration):
         print('vai conectar ao DB')
         #Get secrets
         secret = get_secrets(os.environ['SECRET_NAME'])
+        print('secrets: ', secret)
         db_username = secret['username']
         db_password = secret['password']
         db_name = secret['dbname']
