@@ -26,7 +26,7 @@ variable "rds_db_name" {
 
 variable "vpc_id" {
   type    = string
-  default = ""
+  default = "vpc-"
 }
 
 variable "subnet_a" {

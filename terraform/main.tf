@@ -6,7 +6,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = "terraform-state-soat"
-    key    = "hackathon-lambda-authentication/terraform.tfstate"
+    key    = "hackathon-authentication-lambda/terraform.tfstate"
     region = "us-east-1"
 
     dynamodb_table = "terraform-state-soat-locking"
@@ -24,7 +24,7 @@ data "archive_file" "code" {
 #Security Group ECS
 resource "aws_security_group" "security_group_auth_lambda" {
   name_prefix = "hackathon_security_group_auth_lambda"
-  description = "SG for HACKATHON Authentication Lambda"
+  description = "HACKATHON SG for Authentication Lambda"
   vpc_id      = var.vpc_id
 
   ingress {
@@ -44,7 +44,7 @@ resource "aws_security_group" "security_group_auth_lambda" {
   tags = {
     infra   = "lambda"
     service = "gateway"
-    Name    = "hackathon_security_group_auth_lambda"
+    Name    = "security_group_auth_lambda"
   }
 }
 

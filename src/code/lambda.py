@@ -5,33 +5,42 @@ import os
 import jwt
 import datetime
 import sys
+import bcrypt
 
 def main(event, context):
+    statusCode = 401,
+    body = json.dumps({
+        "message": "Unauthorized: Missing or invalid authentication credentials."
+    })
+
+    if 'body' in event:
+        request_body = json.loads(event['body'])
+        if 'registration' & 'password' in request_body:
+            registration = request_body['registration']
+            password = request_body['password']
+            result = get_password(registration)
+            if result:
+                if verify_password(result[0], password):
+                    jwt = build_jwt(registration)
+                    statusCode = 200
+                    body = json.dumps({
+                        "token": jwt
+                    })
+                else:
+                    body = json.dumps({
+                        "message": "Wrong password"
+                    })
+            else:
+                body = json.dumps({
+                    "message": "User not found"
+                })
     response = {
-        "statusCode": 401,
+        "statusCode": statusCode,
         "headers": {
             "Content-Type": "application/json"
         },
-        "body": json.dumps({
-            "message": "Unauthorized: Missing or invalid authentication credentials."
-        })
+        "body": body
     }
-    if 'body' in event:
-        request_body = json.loads(event['body'])
-        if 'cpf' in request_body:
-            cpf = request_body['cpf']
-            result = get_cliente(cpf)
-            if len(result) > 0:
-                jwt = build_jwt(cpf)
-                response = {
-                    "statusCode": 200,
-                    "headers": {
-                        "Content-Type": "application/json"
-                    },
-                    "body": json.dumps({
-                        "token": jwt
-                    }) 
-                }
     return response
 
 def get_secrets(secret_name):
@@ -49,7 +58,7 @@ def get_secrets(secret_name):
         print("Error! ", e)
         sys.exit(1) 
 
-def get_cliente(cpf):
+def get_password(registration):
     try:
         #Get secrets
         secret = get_secrets(os.environ['SECRET_NAME'])
@@ -71,11 +80,11 @@ def get_cliente(cpf):
         print("Connected to the database")
 
         #Build and Query
-        query = "SELECT * FROM clientes WHERE cpf=%s LIMIT 1"
-        cursor.execute(query, (cpf,))
+        query = "SELECT password FROM users WHERE registration=%s"
+        cursor.execute(query, (registration,))
 
         # Fetch the results
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         print('resultado: ', result)
 
         #Close connection
@@ -108,4 +117,8 @@ def build_jwt(cpf):
     except Exception as e:
         print("Error! ", e)
         sys.exit(1)
+
+def verify_password(hashed_password, password):
+    print('password: , hash_password: ', password, hashed_password)
+    return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
     
