@@ -8,14 +8,17 @@ import sys
 import bcrypt
 
 def main(event, context):
+    print('chegou no lambda')
     statusCode = 401,
     body = json.dumps({
         "message": "Unauthorized: Missing or invalid authentication credentials."
     })
 
     if 'body' in event:
+        print('tem body')
         request_body = json.loads(event['body'])
         if 'registration' and 'password' in request_body:
+            print('tem reg e password')
             registration = request_body['registration']
             password = request_body['password']
             result = get_password(registration)
